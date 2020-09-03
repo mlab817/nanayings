@@ -14,7 +14,9 @@
     "@quasar/extras": "^1.0.0",
     "core-js": "^3.6.5",
     "firebase": "^7.19.1",
+    "here-js-api": "^2.0.0",
     "lodash": "^4.17.20",
+    "plugin": "^0.3.3",
     "quasar": "^1.0.0"
   },
   "devDependencies": {

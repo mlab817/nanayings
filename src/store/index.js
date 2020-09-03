@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import auth from './auth'
+import customer from './customer'
 import expense from './expense'
 import inventory from './inventory'
 import order from './order'
@@ -23,6 +24,7 @@ export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
       auth,
+      customer,
       expense,
       inventory,
       order,

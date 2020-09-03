@@ -1,11 +1,14 @@
 <template>
   <q-page>
-    <!-- content -->
+    <page-title title="Manage Inventory"></page-title>
   </q-page>
 </template>
 
 <script>
 export default {
-  // name: 'PageName',
+	components: {
+		'page-title': () => import('../components/PageTitle.vue')
+	},
+  name: 'PageInventories'
 }
 </script>

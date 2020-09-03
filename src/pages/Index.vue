@@ -44,6 +44,11 @@ const featuresData = [
     link: '/orders'
   },
   {
+    title: 'Manage Customers',
+    description: 'Record frequently ordering customers for faster creation of orders',
+    link: '/customers'
+  },
+  {
     title: 'Manage Expenses',
     description: 'Keep track of business expenses. Add expenses into inventory as applicable.',
     link: '/expenses'
@@ -71,7 +76,7 @@ export default {
   	return {
   		features: featuresData,
       slide: 1,
-      autoplay: 3000
+      autoplay: true
   	}
   }
 }

@@ -12,7 +12,7 @@
         />
 
         <q-avatar>
-          <q-img src="logo.jpg" />
+          <q-img src="favicon.ico" />
         </q-avatar>
 
         <q-toolbar-title>
@@ -64,6 +64,11 @@ const linksData = [
     link: '/orders'
   },
   {
+    title: 'Manage Customers',
+    icon: 'account_circle',
+    link: '/customers'
+  },
+  {
     title: 'Manage Expenses',
     icon: 'payment',
     link: '/expenses'
@@ -71,7 +76,7 @@ const linksData = [
   {
     title: 'Manage Inventory',
     icon: 'store',
-    link: '/inventories'
+    link: '/inventory'
   },
   {
     title: 'Manage Products',
