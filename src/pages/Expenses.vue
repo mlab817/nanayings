@@ -51,7 +51,11 @@
 	  			<q-form ref="addExpenseForm" @submit.prevent="addExpense" class="q-gutter-y-sm" greedy >
 	  				<span class="text-caption text-negative">* All fields are required.</span>
 	  				<q-input v-model="expense.date" label="Date" stack-label type="date" :rules="required" hide-bottom-space />
-	  				<q-input v-model="expense.particular" label="Particular" stack-label :rules="required" hide-bottom-space />
+	  				<q-select v-model="expense.particular" :options="optionItems" label="Particular" stack-label :rules="required" hide-bottom-space>
+              <template v-slot:after>
+                <q-icon name="add" @click="addItem" class="cursor-pointer" />
+              </template>
+            </q-select>
 	  				<q-input v-model="expense.quantity" label="Quantity" stack-label type="number" :rules="required" hide-bottom-space />
 	  				<q-input v-model="expense.unit" label="Unit of Measure" stack-label hint="Ex. kg, g, pc, box, pack" :rules="required" hide-bottom-space />
 	  				<q-input v-model="expense.unitPrice" label="Unit Price" stack-label type="number" :rules="required" hide-bottom-space />
@@ -105,7 +109,18 @@ export default {
   		const groupedExpenses = _.groupBy(arrayExpenses, 'date')
 
   		return groupedExpenses
-  	}
+  	},
+    items() {
+      return this.$store.state.inventory.items
+    },
+    optionItems() {
+      const items = this.$store.state.inventory.items
+      const array = []
+      Object.keys(items).forEach(key => {
+        array.push(items[key].name)
+      })
+      return _.sortBy(array)
+    }
   },
   data() {
   	return {
@@ -149,7 +164,19 @@ export default {
 	  			console.error('error')
 	  		}
 	  	})
-	  }
+	  },
+    addItem() {
+      this.$q.dialog({
+        title: 'Add Option',
+        message: 'Add item to options',
+        prompt: {
+          model: '',
+          isValid: val => !!val
+        },
+        persistent: true,
+        cancel: true
+      }).onOk(data => this.$store.dispatch('inventory/addItem', data))
+    }
 	}
 }
 </script>
