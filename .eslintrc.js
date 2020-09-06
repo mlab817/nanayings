@@ -68,6 +68,7 @@ module.exports = {
     'prefer-promise-reject-errors': 'off',
     'no-mixed-spaces-and-tabs': 'off',
     'space-before-function-paren': 'off',
+    'no-empty-pattern': 'off',
 
 
     // allow debugger during development only

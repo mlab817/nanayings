@@ -17,7 +17,8 @@
     "here-js-api": "^2.0.0",
     "lodash": "^4.17.20",
     "plugin": "^0.3.3",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "zingchart-vue": "^2.0.1"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

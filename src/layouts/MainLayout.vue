@@ -31,9 +31,9 @@
       <q-list>
         <q-item-label
           header
-          class="text-grey-8"
+          class="text-grey-8 text-uppercase"
         >
-          Essential Links
+          Menu
         </q-item-label>
         <EssentialLink
           v-for="link in essentialLinks"
@@ -55,8 +55,13 @@ import EssentialLink from 'components/EssentialLink.vue'
 const linksData = [
   {
     title: 'Home',
-    icon: 'dashboard',
+    icon: 'home',
     link: '/'
+  },
+  {
+    title: 'Dashboard',
+    icon: 'dashboard',
+    link: '/dashboard'
   },
   {
     title: 'Manage Orders',

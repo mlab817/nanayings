@@ -1,5 +1,8 @@
 <template>
-	<q-toolbar>
+	<q-toolbar class="text-primary">
+		<q-avatar v-if="icon">
+			<q-icon :name="icon"></q-icon>
+		</q-avatar>
 		<q-toolbar-title>{{title}}</q-toolbar-title>
 		<q-space />
 		<slot></slot>
@@ -13,6 +16,10 @@
 			title: {
 				type: String,
 				required: true
+			},
+			icon: {
+				type: String,
+				default: null
 			}
 		}
 	}

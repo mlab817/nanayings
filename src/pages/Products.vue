@@ -1,10 +1,8 @@
 <template>
   <q-page>
-    <q-toolbar>
-  		<q-toolbar-title>Manage Products</q-toolbar-title>
-  		<q-space />
+    <page-title icon="category" title="Manage Products">
   		<q-btn icon-right="add" label="Add" color="primary" @click="addProductDialog = true"></q-btn>
-  	</q-toolbar>
+  	</page-title>
 
   	<template v-if="Object.keys(products).length">
   		<q-list bordered separator>
@@ -56,7 +54,12 @@
 </template>
 
 <script>
+import PageTitle from '../components/PageTitle.vue'
+
 export default {
+  components: {
+    PageTitle
+  },
   name: 'PageProducts',
   computed: {
   	products() {

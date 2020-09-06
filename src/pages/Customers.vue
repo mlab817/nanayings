@@ -1,6 +1,6 @@
 <template>
 	<q-page>
-		<page-title title="Manage Customers">
+		<page-title icon="account_circle" title="Manage Customers">
 			<add-button @click="addCustomerDialog = true"></add-button>
 		</page-title>
 

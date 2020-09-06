@@ -1,8 +1,6 @@
 <template>
   <q-page>
-  	<q-toolbar>
-  		<q-toolbar-title>Home</q-toolbar-title>
-  	</q-toolbar>
+  	<page-title icon="home" title="Home"></page-title>
 
     <div>
       <q-carousel
@@ -37,6 +35,8 @@
 </template>
 
 <script>
+import PageTitle from '../components/PageTitle.vue'
+
 const featuresData = [
   {
     title: 'Manage Orders',
@@ -71,6 +71,9 @@ const featuresData = [
 ]
 
 export default {
+  components: {
+    PageTitle
+  },
   name: 'PageIndex',
   data() {
   	return {

@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <page-title title="Manage Inventory"></page-title>
+    <page-title icon="store" title="Manage Inventory"></page-title>
   </q-page>
 </template>
 

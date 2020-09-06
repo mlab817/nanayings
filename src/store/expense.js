@@ -1,55 +1,16 @@
 import Vue from 'vue'
 import { uid } from 'quasar'
+import { firebaseDb } from 'boot/firebase'
+import { handleSuccess, handleError } from 'src/utils'
 
 const state = () => {
 	return {
-		expenses: {
-			'48ed4787-d006-4997-8684-54bc0c6a3491': {
-				date: '2020-08-31',
-				particular: 'Chocolate',
-				quantity: 1,
-				unit: 'kg',
-				unitPrice: 100,
-				amount: 100
-			},
-			'8ce2dcaa-92fe-486a-9d42-f9d411f2c958': {
-				date: '2020-08-30',
-				particular: 'Eggs',
-				quantity: 10,
-				unit: 'pc',
-				unitPrice: 8,
-				amount: 80
-			},
-			'b192e8bd-ed85-4535-9070-81ef37e8e03b': {
-				date: '2020-08-30',
-				particular: 'Eggs',
-				quantity: 10,
-				unit: 'pc',
-				unitPrice: 10,
-				amount: 100
-			},
-			'971f1ea7-8c14-4858-8acb-2fc9ca48e981': {
-		 		date: '2020-08-31',
-		 		particular: 'Banana',
-		 		quantity: 2,
-		 		unit: 'kg',
-		 		unitPrice: 50,
-		 		amount: 100
-			},
-			'f10dce60-a749-407b-804f-d4ab87406eee': {
-				date: '2020-08-31',
-				particular: 'Marshmallow',
-				quantity: 1,
-				unit: 'pack',
-				unitPrice: 75,
-				amount: 75
-			}
-		}
+		expenses: {}
 	}
 }
 
 const actions = {
-	add: ({ commit }, payload) => {
+	add: ({ dispatch }, payload) => {
 		const id = uid()
 
 		const expense = {
@@ -57,13 +18,54 @@ const actions = {
 			data: payload
 		}
 
-		commit('ADD', expense)
+		dispatch('fbAdd', expense)
+	},
+	fbAdd: ({}, payload) => {
+		const doc = firebaseDb.collection('expenses').doc()
+
+		doc.set(payload.data)
+			.then(handleSuccess)
+			.catch(handleError)
+	},
+	fbRead: ({ commit }) => {
+		const docs = firebaseDb.collection('expenses')
+
+		docs.onSnapshot(querySnapshot => {
+			querySnapshot.docChanges().forEach(change => {
+				if (change.type === 'added') {
+					const payload = {
+						id: change.doc.id,
+						data: change.doc.data()
+					}
+					commit('ADD', payload)
+				}
+
+				if (change.type === 'modified') {
+					const payload = {
+						id: change.doc.id,
+						data: change.doc.data()
+					}
+					commit('UPDATE', payload)
+				}
+
+				if (change.type === 'removed') {
+					const id = change.doc.id
+					commit('DELETE', id)
+				}
+			})
+		})
 	}
 }
 
 const mutations = {
 	ADD: (state, payload) => {
 		Vue.set(state.expenses, payload.id, payload.data)
+	},
+	UPDATE: (state, payload) => {
+		Vue.set(state.expenses, payload.id, payload.data)
+	},
+	DELETE: (state, id) => {
+		Vue.delete(state.expenses, id)
 	}
 }
 

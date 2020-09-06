@@ -1,14 +1,50 @@
 <template>
   <q-page>
-    <page-title title="Manage Orders">
+    <page-title icon="shopping_cart" title="Manage Orders">
       <q-btn icon-right="add" label="Add" color="primary" @click="addOrderDialog = true"></q-btn>
     </page-title>
 
     <template v-if="Object.keys(orders).length">
-  	  <q-list>
+  	  <q-list separator bordered>
         <q-item v-for="(order, key) in orders" :key="key">
-          {{key}}
-          {{order}}
+          <q-item-section avatar>
+            <q-avatar class="text-white bg-primary">
+              {{order.customer ? order.customer.label.charAt(0) : ''}}
+            </q-avatar>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{order.customer ? order.customer.label : ''}}</q-item-label>
+            <q-item-label caption><q-icon name="room" /> {{order.address}}</q-item-label>
+            <q-item-label caption><q-icon name="call" /> {{order.contactNo}}</q-item-label>
+          </q-item-section>
+          <q-item-section>
+            <template v-for="(item, index) in order.orders">
+              <q-item-label :key="index">{{item.quantity}} x {{item.product.label}}</q-item-label>
+            </template>
+          </q-item-section>
+          <q-item-section class="text-right">
+            <q-item-label>
+              {{order.deliveryDate}} <q-icon name="event" />
+            </q-item-label>
+            <q-item-label>
+              {{order.deliveryTime}} <q-icon name="alarm" />
+            </q-item-label>
+          </q-item-section>
+          <q-item-section class="col-2 text-right">
+            PhP {{
+              (order.orders && order.orders.length) ? order.orders.reduce((acc, item) => {
+                acc += item.amount
+                return acc
+              },0) : 0
+            }}
+          </q-item-section>
+          <q-item-section side>
+            <div class="row">
+              <q-btn icon="done" color="positive" flat round dense @click="completeOrder(key)" />
+              <q-btn icon="edit" color="blue" flat round dense />
+              <q-btn icon="delete" color="negative" flat round dense @click="deleteOrder(key)" />
+            </div>
+          </q-item-section>
         </q-item>
       </q-list>
     </template>
@@ -25,14 +61,30 @@
         <modal-header title="Add Order" />
         <q-card-section>
           <q-form ref="addOrderForm" class="q-gutter-sm" greedy>
-            {{order}}
             <q-select v-model="order.customer" :options="optionCustomers" stack-label label="Customer" hide-bottom-space @input="setAddresses"></q-select>
-            <q-select v-model="order.address" :options="addresses" label="Address" stack-label :rules="required" hide-bottom-space />
-            <q-input v-model="order.contactNo" label="Contact Numbers" stack-label :rules="required" hide-bottom-space />
-            <!-- <q-select v-model="order.product" :options="optionProducts" label="Product" stack-label :rules="required" hide-bottom-space @input="setPrice" />
-            <q-input v-model="order.price" label="Price (PhP)" stack-label :rules="required" hide-bottom-space type="number" />
-            <q-input v-model="order.quantity" label="Quantity" stack-label :rules="required" hide-bottom-space type="number" />
-            <q-input v-model="order.amount" label="Amount (PhP)" stack-label :rules="required" hide-bottom-space type="number" readonly /> -->
+            <q-select v-model="order.address" :options="addresses" label="Address" stack-label :rules="required" hide-bottom-space v-if="!!order.customer" />
+            <q-input v-model="order.contactNo" label="Contact Numbers" stack-label :rules="required" hide-bottom-space v-if="!!order.customer" />
+            <q-item-label>Order/s</q-item-label>
+            <q-item v-for="(item, index) in order.orders" :key="index">
+              <q-item-section avatar top>
+                <q-item-label>
+                  {{item.quantity}}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>
+                  {{item.product.label}}
+                </q-item-label>
+                <q-item-label>
+                  P {{item.price}}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side top>
+                <q-item-label>
+                  P {{item.amount}}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
             <q-btn @click="addNewOrderDialog = true" label="Add Order" color="primary" />
             <q-input v-model="order.deliveryDate" label="Delivery Date" stack-label :rules="required" hide-bottom-space type="date" />
             <q-input v-model="order.deliveryTime" label="Delivery Time" stack-label :rules="required" hide-bottom-space type="time" />
@@ -105,7 +157,7 @@ export default {
       return optionProducts
     },
     orders() {
-      return this.$store.state.order.orders
+      return this.$store.getters['order/active']
     }
   },
   watch: {
@@ -129,11 +181,8 @@ export default {
         customer: '',
         address: '',
         contactNo: '',
-        quantity: 0,
         deliveryDate: '',
         deliveryTime: '',
-        price: 0,
-        amount: 0,
         orders: []
       },
       required: [val => !!val || '* Required'],
@@ -152,7 +201,8 @@ export default {
       this.$refs.addOrderForm.validate().then(success => {
         if (success) {
           const order = this.order
-          this.$store.dispatch('order/add', order)
+          if (order.orders.length) {
+            this.$store.dispatch('order/add', order)
             .then(() => {
               this.order = {
                 name: '',
@@ -167,15 +217,16 @@ export default {
               this.addOrderDialog = false
             })
             .catch(err => console.log(err.message))
+          } else {
+            alert('Please add order')
+          }
         } else {
           console.log('error')
         }
       })
     },
     setPrice(e) {
-      console.log(e)
       const selectedProduct = this.products[e.value]
-      this.order.price = parseInt(selectedProduct.price)
       this.newOrder.price = parseInt(selectedProduct.price)
     },
     setAddresses(e) {
@@ -199,6 +250,26 @@ export default {
         value: 0
       }
       this.addNewOrderDialog = false
+    },
+    completeOrder(key) {
+      console.log(key)
+    },
+    deleteOrder(key) {
+      this.$q.dialog({
+        title: 'Delete Order',
+        message: 'Add reason for deletion',
+        prompt: {
+          model: '',
+          type: 'text'
+        },
+        cancel: true
+      }).onOk(data => {
+        this.$store.dispatch('order/delete', {
+          id: key,
+          reason: data
+        })
+      })
+      console.log(key)
     }
   }
 }
