@@ -40,7 +40,7 @@
           </q-item-section>
           <q-item-section side>
             <div class="row">
-              <q-btn icon="done" color="positive" flat round dense @click="completeOrder(key)" />
+              <q-btn icon="done" color="positive" flat round dense @click="completeOrder(order, key)" />
               <q-btn icon="edit" color="blue" flat round dense />
               <q-btn icon="delete" color="negative" flat round dense @click="deleteOrder(key)" />
             </div>
@@ -251,8 +251,20 @@ export default {
       }
       this.addNewOrderDialog = false
     },
-    completeOrder(key) {
-      console.log(key)
+    completeOrder(order, key) {
+      this.$q.dialog({
+        title: 'Complete Transaction',
+        message: 'Mark this transaction as completed?',
+        cancel: true
+      }).onOk(() => {
+        this.$store.dispatch('order/complete', {
+          order: {
+            ...order,
+            id: key
+          },
+          id: key
+        })
+      })
     },
     deleteOrder(key) {
       this.$q.dialog({
@@ -271,6 +283,9 @@ export default {
       })
       console.log(key)
     }
+  },
+  created() {
+    this.$store.dispatch('order/fbRead')
   }
 }
 </script>

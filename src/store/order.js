@@ -1,101 +1,25 @@
 import Vue from 'vue'
-import { uid } from 'quasar'
+import { firebaseDb } from 'boot/firebase'
+import { handleSuccess, handleError } from 'src/utils'
 
 const state = () => {
 	return {
-		orders: {
-			ID1: {
-				customer: {
-					value: '1cf406d8-213e-4399-bcaa-8e69cb760bcc',
-					label: 'Lester Bolotaolo'
-				},
-				address: 'Molave Condominium',
-				contactNo: '09562688184',
-				quantity: 3,
-				deliveryDate: '2020-09-04',
-				deliveryTime: '12:00',
-				product: {
-					value: 'ID1',
-					label: 'Banana Bread with Chocolate (P140)'
-				},
-				price: 140,
-				amount: 420,
-				orderPlaced: '2020-08-31T07:15:55.632Z'
-			},
-			ID2: {
-				customer: {
-					value: '1cf406d8-213e-4399-bcaa-8e69cb760bcc',
-					label: 'Lester'
-				},
-				address: 'Molave Condominium',
-				contactNo: '09562688184',
-				deliveryDate: '2020-09-06',
-				deliveryTime: '12:00',
-				orders: [
-					{
-						product: {
-							value: 'ID1',
-							label: 'Banana Bread with Chocolate (P140)'
-						},
-						quantity: '1',
-						price: 140,
-						value: 0,
-						amount: 140
-					}
-				],
-				orderPlaced: '2020-09-06T02:09:33.286Z'
-			},
-			'081b91f7-efc5-430f-96bf-02013b276ec2': {
-				customer: {
-					value: '1cf406d8-213e-4399-bcaa-8e69cb760bcc',
-					label: 'Lester'
-				},
-				address: 'Molave Condominium',
-				contactNo: '09562688184',
-				quantity: 0,
-				deliveryDate: '2020-09-05',
-				deliveryTime: '21:00',
-				price: 130,
-				amount: 0,
-				orders: [
-					{
-						product: {
-							value: 'ID1',
-							label: 'Banana Bread with Chocolate (P140)'
-						},
-						quantity: '1',
-						price: 140,
-						value: 0,
-						amount: 140
-					},
-					{
-						product: {
-							value: 'ID2',
-							label: 'Plain Banana Bread (P130)'
-						},
-						quantity: '1',
-						price: 130,
-						value: 0,
-						amount: 130
-					}
-				],
-				orderPlaced: '2020-09-05T13:35:06.781Z'
-			}
-		}
+		orders: {}
 	}
 }
 
 const actions = {
-	add: ({ commit }, payload) => {
-		const id = uid()
+	add: ({ dispatch }, payload) => {
 		payload.orderPlaced = new Date()
 
-		const order = {
-			id: id,
-			data: payload
-		}
+		dispatch('fbAdd', payload)
+	},
+	fbAdd: ({}, payload) => {
+		const doc = firebaseDb.collection('orders').doc()
 
-		commit('ADD', order)
+		doc.set(payload)
+			.then(handleSuccess)
+			.catch(handleError)
 	},
 	delete: ({ commit, state }, payload) => {
 		// payload contains id and reason
@@ -109,11 +33,62 @@ const actions = {
 		}
 
 		commit('DELETE', order)
+	},
+	update: ({ dispatch }, payload) => {
+		// data, id
+	},
+	fbUpdate: ({}, payload) => {
+		const doc = firebaseDb.collection('orders').doc(payload.id)
+
+		doc.update(payload.updates)
+			.then(handleSuccess)
+			.catch(handleError)
+	},
+	complete: ({ dispatch }, payload) => {
+		// id, order
+		const order = {
+			id: payload.id,
+			data: payload.order,
+			updates: {
+				completed: true
+			}
+		}
+		dispatch('fbUpdate', order)
+		dispatch('sale/add', payload.order, { root: true })
+	},
+	fbRead: ({ commit }) => {
+		const docs = firebaseDb.collection('orders')
+
+		docs.onSnapshot(querySnapshot => {
+			querySnapshot.docChanges().forEach(change => {
+				if (change.type === 'added') {
+					const payload = {
+						id: change.doc.id,
+						data: change.doc.data()
+					}
+					commit('ADD', payload)
+				}
+				if (change.type === 'modified') {
+					const payload = {
+						id: change.doc.id,
+						data: change.doc.data()
+					}
+					commit('UPDATE', payload)
+				}
+				if (change.type === 'removed') {
+					const id = change.doc.id
+					commit('DELETE', id)
+				}
+			})
+		})
 	}
 }
 
 const mutations = {
 	ADD: (state, payload) => {
+		Vue.set(state.orders, payload.id, payload.data)
+	},
+	UPDATE: (state, payload) => {
 		Vue.set(state.orders, payload.id, payload.data)
 	},
 	DELETE: (state, payload) => {
@@ -127,7 +102,9 @@ const getters = {
 
 		Object.keys(orders).forEach(key => {
 			const deleted = orders[key].deleted || false
-			if (!deleted) {
+			const completed = orders[key].completed || false
+			console.log(completed)
+			if (!deleted && !completed) {
 				activeOrders[key] = orders[key]
 			}
 		})

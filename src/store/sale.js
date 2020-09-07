@@ -13,7 +13,8 @@ const actions = {
 		dispatch('fbAdd', payload)
 	},
 	fbAdd: ({}, payload) => {
-		const doc = firebaseDb.collection('sales')
+		const doc = firebaseDb.collection('sales').doc()
+		payload.dateAdded = new Date()
 
 		doc.set(payload)
 			.then(handleSuccess)

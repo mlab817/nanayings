@@ -96,6 +96,9 @@ export default {
   			}
   		})
   	}
+  },
+  created() {
+    this.$store.dispatch('product/fbRead')
   }
 }
 </script>

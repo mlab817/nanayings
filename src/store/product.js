@@ -1,33 +1,49 @@
 import Vue from 'vue'
-import { uid } from 'quasar'
+import { firebaseDb } from 'boot/firebase'
+import { handleSuccess, handleError } from 'src/utils'
 
 const state = () => {
 	return {
-		products: {
-			ID1: {
-				name: 'Banana Bread with Chocolate',
-				description: 'Banana bread with generous chocolate flavor',
-				price: 140
-			},
-			ID2: {
-				name: 'Plain Banana Bread',
-				description: 'The original banana bread',
-				price: 130
-			}
-		}
+		products: {}
 	}
 }
 
 const actions = {
-	add: ({ commit }, payload) => {
-		const id = uid()
+	add: ({ dispatch }, payload) => {
+		dispatch('fbAdd', payload)
+	},
+	fbAdd: ({}, payload) => {
+		const doc = firebaseDb.collection('products').doc()
 
-		const product = {
-			id: id,
-			data: payload
-		}
+		doc.set(payload)
+			.then(handleSuccess)
+			.catch(handleError)
+	},
+	fbRead: ({ commit }) => {
+		const docs = firebaseDb.collection('products')
 
-		commit('ADD', product)
+		docs.onSnapshot(querySnapshot => {
+			querySnapshot.docChanges().forEach(change => {
+				if (change.type === 'added') {
+					const payload = {
+						id: change.doc.id,
+						data: change.doc.data()
+					}
+					commit('ADD', payload)
+				}
+				if (change.type === 'modified') {
+					const payload = {
+						id: change.doc.id,
+						data: change.doc.data()
+					}
+					commit('UPDATE', payload)
+				}
+				if (change.type === 'removed') {
+					const id = change.doc.id
+					commit('DELETE', id)
+				}
+			})
+		})
 	}
 }
 

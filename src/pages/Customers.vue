@@ -155,6 +155,9 @@
 				})
 				.onOk(() => this.$store.dispatch('customer/delete', index))
 			}
+		},
+		created() {
+			this.$store.dispatch('customer/fbRead')
 		}
 	}
 </script>
