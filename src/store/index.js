@@ -5,9 +5,11 @@ import auth from './auth'
 import customer from './customer'
 import expense from './expense'
 import inventory from './inventory'
+import item from './item'
 import order from './order'
 import product from './product'
 import sale from './sale'
+import shop from './shop'
 
 Vue.use(Vuex)
 
@@ -27,9 +29,11 @@ export default function (/* { ssrContext } */) {
       customer,
       expense,
       inventory,
+	    item,
       order,
       product,
-      sale
+      sale,
+	    shop
     },
 
     // enable strict mode (adds overhead!)

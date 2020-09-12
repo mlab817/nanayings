@@ -46,6 +46,14 @@
             </div>
           </q-item-section>
         </q-item>
+				<q-item class="text-h6">
+					<q-item-section>
+						Total Pending Orders
+					</q-item-section>
+					<q-item-section side>
+						{{ totalOrders.toLocaleString() }}
+					</q-item-section>
+				</q-item>
       </q-list>
     </template>
 
@@ -158,7 +166,19 @@ export default {
     },
     orders() {
       return this.$store.getters['order/active']
-    }
+    },
+		totalOrders() {
+    	const orders = Object.keys(this.orders).map(key => this.orders[key])
+
+			return orders.reduce((acc, order) => {
+				const total = order.orders.length ? order.orders.reduce((ord, o) => {
+					ord += o.amount
+					return ord
+				}, 0) : 0
+				acc += parseFloat(total)
+				return acc
+			}, 0)
+		}
   },
   watch: {
     'order.quantity': {
@@ -212,7 +232,8 @@ export default {
                 deliveryDate: '',
                 deliveryTime: '',
                 price: 0,
-                amount: 0
+                amount: 0,
+								orders: []
               }
               this.addOrderDialog = false
             })

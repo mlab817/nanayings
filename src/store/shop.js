@@ -1,29 +1,16 @@
-import Vue from 'vue'
 import { firebaseDb } from 'boot/firebase'
-import { handleSuccess, handleError } from 'src/utils'
+import Vue from 'vue'
+import { handleError, handleSuccess } from 'src/utils'
 
 const state = () => {
 	return {
-		customers: {}
+		shops: {}
 	}
 }
 
 const actions = {
-	add: ({ dispatch }, payload) => {
-		dispatch('fbAdd', payload)
-	},
-	fbAdd: ({}, payload) => {
-		const doc = firebaseDb.collection('customers').doc()
-
-		doc.set(payload)
-			.then(handleSuccess)
-			.catch(handleError)
-	},
-	delete: ({ commit }, id) => {
-		commit('DELETE', id)
-	},
 	fbRead: ({ commit }) => {
-		const docs = firebaseDb.collection('customers')
+		const docs = firebaseDb.collection('shops')
 
 		docs.onSnapshot(querySnapshot => {
 			querySnapshot.docChanges().forEach(change => {
@@ -40,27 +27,38 @@ const actions = {
 						id: change.doc.id,
 						data: change.doc.data()
 					}
-					commit('UPDATE', payload)
+					commit('ADD', payload)
 				}
 
 				if (change.type === 'removed') {
 					const id = change.doc.id
+
 					commit('DELETE', id)
 				}
 			})
 		})
+	},
+	add: ({ dispatch }, payload) => {
+		dispatch('fbAdd', payload)
+	},
+	fbAdd: ({}, payload) => {
+		const doc = firebaseDb.collection('shops').doc()
+
+		doc.set(payload)
+			.then(handleSuccess)
+			.catch(handleError)
 	}
 }
 
 const mutations = {
 	ADD: (state, payload) => {
-		Vue.set(state.customers, payload.id, payload.data)
+		Vue.set(state.shops, payload.id, payload.data)
 	},
 	UPDATE: (state, payload) => {
-		Vue.set(state.customers, payload.id, payload.data)
+		Vue.set(state.shops, payload.id, payload.data)
 	},
 	DELETE: (state, id) => {
-		Vue.delete(state.customers, id)
+		Vue.delete(state.shops, id)
 	}
 }
 

@@ -103,6 +103,15 @@ export default {
       leftDrawerOpen: false,
       essentialLinks: linksData
     }
-  }
+  },
+	created() {
+  	this.$store.dispatch('customer/fbRead')
+		this.$store.dispatch('shop/fbRead')
+		this.$store.dispatch('order/fbRead')
+		this.$store.dispatch('product/fbRead')
+		this.$store.dispatch('sale/fbRead')
+		this.$store.dispatch('expense/fbRead')
+		this.$store.dispatch('item/fbRead')
+	}
 }
 </script>

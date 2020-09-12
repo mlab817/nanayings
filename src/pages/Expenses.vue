@@ -37,7 +37,11 @@
         <q-card-section>
           <q-form ref="addExpenseForm" class="q-gutter-y-sm" @submit="onSubmit" @reset="onReset" greedy>
             <q-input v-model="newItem.date" label="Date Purchased" stack-label type="date" :rules="required" hide-bottom-space />
-            <q-select v-model="newItem.store" :options="optionStore" label="Store" stack-label :rules="required" hide-bottom-space />
+						<q-select v-model="newItem.shop" :options="optionShop" label="Store" stack-label :rules="required" hide-bottom-space>
+							<template v-slot:after>
+								<q-icon name="add" @click="addShop" class="cursor-pointer"></q-icon>
+							</template>
+						</q-select>
             <q-select v-model="newItem.item" :options="optionItems" label="Item" stack-label :rules="required" hide-bottom-space>
               <template v-slot:after>
                 <q-icon name="add" @click="addItem" class="cursor-pointer" />
@@ -107,25 +111,23 @@ export default {
 
   		return groupedExpenses
   	},
-    items() {
-      return this.$store.state.inventory.items
-    },
     stores() {
       return this.$store.state.inventory.stores
     },
     optionItems() {
-      const items = this.$store.state.inventory.items
-      const array = []
-      Object.keys(items).forEach(key => {
-        array.push(items[key].name)
-      })
-      return _.sortBy(array)
-    },
-    optionStore() {
-      const stores = this.$store.state.inventory.stores
-      return Object.keys(stores).map(key => {
+      const items = this.$store.state.item.items
+      return Object.keys(items).map(key => {
         return {
-          label: stores[key].name,
+        	label: items[key].name,
+					value: key
+        }
+      })
+    },
+    optionShop() {
+      const shops = this.$store.state.shop.shops
+      return Object.keys(shops).map(key => {
+        return {
+          label: shops[key].name,
           value: key
         }
       })
@@ -144,7 +146,7 @@ export default {
       addItemDialog: false,
       newItem: {
         date: null,
-        store: null,
+        shop: null,
         item: null,
         particular: null,
         quantity: 0,
@@ -167,9 +169,9 @@ export default {
           sortable: true
         },
         {
-          name: 'store',
-          label: 'Store',
-          field: row => (typeof row.store === 'object') ? row.store.label : row.store,
+          name: 'shop',
+          label: 'Shop',
+          field: row => (typeof row.shop === 'object') ? row.shop.label : row.shop,
           align: 'center',
           sortable: true
         },
@@ -262,11 +264,26 @@ export default {
         },
         persistent: true,
         cancel: true
-      }).onOk(data => this.$store.dispatch('inventory/addItem', data))
+      }).onOk(data => this.$store.dispatch('item/add', {
+      	name: data
+      }))
     },
+		addShop () {
+			this.$q.dialog({
+				title: 'Add Shop',
+				message: 'Name of store',
+				prompt: {
+					model: '',
+					isValid: val => !!val
+				},
+				cancel: true
+			}).onOk(data => this.$store.dispatch('shop/add', {
+				name: data
+			}))
+		},
     onReset() {
       this.newItem.date = ''
-      this.newItem.store = ''
+      this.newItem.shop = ''
       this.newItem.item = ''
       this.newItem.particular = ''
       this.newItem.quantity = 0
